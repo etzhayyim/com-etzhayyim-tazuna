@@ -1,0 +1,18 @@
+{:lexicon 1
+ :id "com.etzhayyim.tazuna.robotDescriptor"
+ :defs
+ {:main
+  {:type "record"
+   :key "tid"
+   :record
+   {:type "object"
+    :required ["robotId" "bodyActor" "forceClass" "transport" "edgeEnvelope" "representative"]
+    :properties
+    {:robotId {:type "string" :description "stable fleet-member id"}
+     :bodyActor {:type "string" :description "owning robotics-body actor (sanae / hataori / kiyome / giemon / wadachi)"}
+     :forceClass {:type "string" :enum ["observational" "soft-actuation" "powered-actuation"] :description "N1 — :weaponizable is unrepresentable; activation governed by 1 SBT=1 vote (G3)"}
+     :transport {:type "string" :enum ["ros2-dds" "open-rmf" "orbit-rest-shape"] :description "clean-room open-standard / published-shape transport only (G1)"}
+     :capabilities {:type "string" :description "serialized skill descriptors (open vocabulary; LeRobot/ROS 2 action shapes)"}
+     :edgeEnvelope {:type "boolean" :description "G6 — the body's on-board policy runtime fits the baien edge envelope (WASM-32 / iPhone-12 / Android-4GB)"}
+     :forceAuthRef {:type "string" :description "G3 — reference to the etzhayyim-force-authorization decision (1 SBT=1 vote) admitting this force class; required before any teleopGrant"}
+     :representative {:type "boolean" :const true :description "G12 — R0 seed is :representative"}}}}}}

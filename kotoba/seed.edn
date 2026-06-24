@@ -1,0 +1,37 @@
+;; tazuna (手綱) :representative seed (G12) — R0, no live fleet, no live link (G7).
+;; Demonstrates the full teleop->demonstration->policy->supervised-handoff loop as Datoms.
+[;; ── fleet: a soft-actuation sanae weeder + an observational kiyome rover ──────
+ {:robot/id "sanae-saotome-01"  :robot/body-actor "sanae"  :robot/force-class :soft-actuation
+  :robot/transport :ros2-dds   :robot/capabilities "precision-seed; arm6-soft-pick"
+  :robot/edge-envelope true    :robot/force-auth-ref "forceauth:sanae-soft-001" :robot/representative true}
+ {:robot/id "kiyome-houki-01"   :robot/body-actor "kiyome" :robot/force-class :observational
+  :robot/transport :open-rmf   :robot/capabilities "survey; sweep-rover"
+  :robot/edge-envelope true    :robot/force-auth-ref "forceauth:kiyome-obs-001" :robot/representative true}
+
+ ;; ── a server-keyless, force-authorized teleop grant (G3/G4) ───────────────────
+ {:grant/id "grant-001" :grant/robot "sanae-saotome-01" :grant/principal :member
+  :grant/server-held-key false :grant/secret-ref "encref:com.etzhayyim.encrypted/tazuna-grant-001"
+  :grant/force-auth-ref "forceauth:sanae-soft-001" :grant/deadman-ms 300 :grant/latency-budget-ms 150
+  :grant/on-chain-anchor true}
+
+ ;; ── three commands: a nominal member-signed move, a latency-breach safe-stop, an e-stop ──
+ {:cmd/id "cmd-001" :cmd/grant "grant-001" :cmd/kind :move      :cmd/member-sig "m:ed25519:demo" :cmd/server-sig ""
+  :cmd/dry-run true :cmd/safe-state :nominal          :cmd/anchor-root "bafyrei-demo-root"}
+ {:cmd/id "cmd-002" :cmd/grant "grant-001" :cmd/kind :halt      :cmd/member-sig "m:ed25519:demo" :cmd/server-sig ""
+  :cmd/dry-run true :cmd/safe-state :latency-breach   :cmd/anchor-root "bafyrei-demo-root"}
+ {:cmd/id "cmd-003" :cmd/grant "grant-001" :cmd/kind :estop     :cmd/member-sig "" :cmd/server-sig ""
+  :cmd/dry-run true :cmd/safe-state :estopped         :cmd/anchor-root "bafyrei-demo-root"}
+
+ ;; ── a consent-bound, cash=0 demonstration episode (G8/N8) ─────────────────────
+ {:episode/id "ep-001" :episode/robot "sanae-saotome-01" :episode/schema :lerobot-v2
+  :episode/frame-count 1840 :episode/cid "bafy-demo-episode-001"
+  :episode/consent true :episode/encrypted true :episode/cash 0}
+
+ ;; ── a policy learned from it, in the edge envelope, never promoted to live (G6/N6) ──
+ {:policy/id "pol-001" :policy/body-actor "sanae" :policy/method :behavior-cloning
+  :policy/trained-via :baien-federated :policy/edge-envelope true :policy/cid "bafy-demo-policy-001"
+  :policy/eval-score 612 :policy/promotion :sim-only}
+
+ ;; ── a supervised hand-off under the SAE-L4 ceiling (N6) ───────────────────────
+ {:handoff/id "ho-001" :handoff/policy "pol-001" :handoff/robot "sanae-saotome-01"
+  :handoff/supervision :member-attended :handoff/takeback-latency-ms 120 :handoff/sae-ceiling :L4}]

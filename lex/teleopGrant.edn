@@ -1,0 +1,20 @@
+{:lexicon 1
+ :id "com.etzhayyim.tazuna.teleopGrant"
+ :defs
+ {:main
+  {:type "record"
+   :key "tid"
+   :record
+   {:type "object"
+    :required ["robotId" "principal" "serverHeldKey" "secretRef" "forceAuthRef" "deadmanMs" "latencyBudgetMs" "outwardGated"]
+    :properties
+    {:robotId {:type "string" :description "the robot this session may command"}
+     :principal {:type "string" :const "member" :description "G3/G4 — the operator is the member; the platform is never the principal"}
+     :serverHeldKey {:type "boolean" :const false :description "G4 — the platform NEVER holds the key that commands a physical robot (ADR-2605231525)"}
+     :secretRef {:type "string" :description "G4 — encrypted-envelope ref (com.etzhayyim.encrypted.*) ONLY; never plaintext credentials"}
+     :forceAuthRef {:type "string" :description "G3 — etzhayyim-force-authorization decision admitting the robot's force class (1 SBT=1 vote); a grant without it cannot be built"}
+     :deadmanMs {:type "integer" :description "continuous member-presence deadman timeout in ms; lapse -> safe-stop/autonomy-fallback (G10)"}
+     :latencyBudgetMs {:type "integer" :description "max round-trip command latency in ms; breach -> safe-stop (G10)"}
+     :expiresAt {:type "string" :format "datetime" :description "time-boxed session; no open-ended grant"}
+     :onChainAnchor {:type "boolean" :const true :description "G3/G11 — commands under this grant are Datoms anchored to the commit-DAG root on Base L2"}
+     :outwardGated {:type "boolean" :const true :description "G7 — live actuation Council Lv6+ + operator gated (Lv7+ for :powered-actuation near humans); R0 = no live link"}}}}}}

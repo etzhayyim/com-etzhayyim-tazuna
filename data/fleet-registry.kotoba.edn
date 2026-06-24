@@ -1,0 +1,28 @@
+;; tazuna (手綱) :representative fleet registry (G12) — clean-room transport bindings only (G1).
+;; SSoT for the bodies tazuna can operate. Each entry MUST carry a force-auth-ref before any
+;; teleopGrant can be built (G3). NO live endpoints at R0 (G7); transport names are SHAPES only.
+{:registry/representative true
+ :registry/note "Bodies are the robotics-wave actors (ADR-2606032100) + giemon/wadachi. Transport is the open-standard / published-shape vocabulary (G1): ros2-dds / open-rmf / orbit-rest-shape. :weaponizable is unrepresentable (N1)."
+ :registry/bodies
+ [{:body "sanae"    :glyph "早苗" :domain "field-agriculture" :adr "2606032100"
+   :default-force-class :soft-actuation :transport :ros2-dds
+   :example-robots ["sanae-saotome-01" "sanae-kusanagi-01"]}
+  {:body "kiyome"   :glyph "清め" :domain "domestic-janitorial-cleaning" :adr "2606032100"
+   :default-force-class :soft-actuation :transport :open-rmf
+   :privacy "G9 on-device-only; no cloud video; no biometric capture (homes)"
+   :example-robots ["kiyome-houki-01" "kiyome-nugui-01"]}
+  {:body "hataori"  :glyph "機織" :domain "garment-apparel-assembly" :adr "2606032100"
+   :default-force-class :soft-actuation :transport :ros2-dds
+   :example-robots ["hataori-nuidono-01"]}
+  {:body "giemon"   :glyph "義右衛門" :domain "arm6-manipulation" :adr "2605312330"
+   :default-force-class :powered-actuation :transport :ros2-dds
+   :note "powered-actuation near humans = R5/Lv7+ (G10/N5)"
+   :example-robots ["giemon-arm6-01"]}
+  {:body "wadachi"  :glyph "轍" :domain "autonomous-mobility" :adr "2605242000"
+   :default-force-class :powered-actuation :transport :open-rmf
+   :note "SAE-L4 ceiling; supervised-handoff only (N6)"
+   :example-robots ["wadachi-rover-01"]}]
+ :registry/transports
+ [{:id :ros2-dds        :standard "ROS 2 action/topic/service shapes + DDS (open standard)"}
+  {:id :open-rmf        :standard "Open-RMF (Apache-2.0) task-allocation + fleet-adapter"}
+  {:id :orbit-rest-shape :standard "Boston Dynamics Orbit published REST/gRPC call shapes (neutral vocabulary; G1 names-in-docstrings-only)"}]}

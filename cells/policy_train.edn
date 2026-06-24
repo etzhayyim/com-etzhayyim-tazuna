@@ -1,0 +1,15 @@
+{:cell/id "policy_train"
+ :cell/glyph "綱"
+ :cell/face :learning
+ :cell/kind :langgraph
+ :cell/runtime :wasm
+ :cell/node "issachar"
+ :cell/doc "Train an imitation / behavior-cloning policyArtifact from demonstrationEpisodes via baien federated (ADR-2605242600), Murakumo-only (G5), within the baien edge envelope (G6: WASM-32/iPhone-12/Android-4GB, frozen encoders). Sim-augmentation from kami-engine/kami-genesis + nv-compat Isaac (clean-room). Never promotes to live; emits :sim-only or :supervised-handoff (G7/N6). R0 scaffold (.solve() raises)."
+ :cell/entry "cells/policy_train/cell.py"
+ :cell/handler "PolicyTrainCell"
+ :cell/state-graph
+ {:nodes [:gather-episodes :sim-augment :federated-bc :eval-gate :emit-policy] :entry :gather-episodes
+  :edges [[:gather-episodes :sim-augment] [:sim-augment :federated-bc] [:federated-bc :eval-gate] [:eval-gate :emit-policy] [:emit-policy :end]]}
+ :cell/llm {:provider :murakumo :endpoint "127.0.0.1:4000" :charter-rider true}
+ :cell/gates ["G1" "G5" "G6" "G7" "G11"]
+ :cell/kotoba {:reads [:episode/cid] :writes [:policy/id :policy/cid :policy/eval-score :policy/promotion]}}

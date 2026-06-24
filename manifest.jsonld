@@ -1,0 +1,69 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    "https://etzhayyim.com/ns/actor-manifest"
+  ],
+  "@type": "ActorManifest",
+  "id": "did:web:etzhayyim.com:tazuna",
+  "name": "tazuna",
+  "displayName": "手綱 — Clean-room Remote-Robotics Fleet Operation + Teleoperation + Learning-from-Demonstration",
+  "displayNameJa": "手綱 (たづな)",
+  "displayNameEn": "Tazuna",
+  "description": "The charter-clean answer to the Boston-Dynamics-Orbit shape: the missing HEAD that remotely operates the robotics-body fleet (sanae/kiyome/hataori/giemon/wadachi) and the missing LOOP that learns from operating it. 手綱 = the reins — hold them to guide a robot that does not yet know the path (teleoperation), release them as it earns autonomy through demonstration (imitation learning). Remote actuation is admitted ONLY as Transparent Force (on-chain monitored + open-source + 1 SBT=1 vote, Mission Charter §1.12.B) under no-server-key (the member signs every actuation command; the platform never does). Interop is clean-room: published API shapes + open standards only.",
+  "descriptionJa": "Boston Dynamics Orbit 相当の charter-clean な解。ロボティクス body fleet (sanae/kiyome/hataori/giemon/wadachi) を遠隔運用する HEAD と、その操作から学習する LOOP の欠落を埋める。手綱 = まだ道を知らないロボットを遠隔で導き(teleoperation)、実演を通じて自律を獲得するにつれ手綱を放す(imitation learning)。遠隔アクチュエーションは Transparent Force(完全 on-chain 監視 + open-source + 1 SBT=1 vote, Mission Charter §1.12.B)としてのみ、かつ no-server-key(member が全アクチュエーション command に署名; platform は決して署名しない)の下でのみ許容。interop は clean-room: 公開 API shape + open standard のみ。",
+  "adr": {
+    "master": "etzhayyim:adr:2606042100",
+    "r0": "etzhayyim:adr:2606042100"
+  },
+  "tier": "Tier-B",
+  "glyph": "綱",
+  "kind": "horizontal control-plane (operates the robotics-body actors; not a single-occupation body)",
+  "siblings": [
+    "did:web:etzhayyim.com:sanae",
+    "did:web:etzhayyim.com:hataori",
+    "did:web:etzhayyim.com:kiyome",
+    "did:web:etzhayyim.com:wadachi",
+    "did:web:etzhayyim.com:giemon"
+  ],
+  "operatesBodiesOf": "sanae (早苗) / hataori (機織) / kiyome (清め) — ADR-2606032100; giemon arms; wadachi (轍) mobility — ADR-2605242000",
+  "reusesGnc": "kami-autodrive (ADR-2606010600) for sim teleop + eval-gate + SAE-L4-ceiling supervised autonomy",
+  "learnsVia": "baien federated (ADR-2605242600/2605242630) within the edge envelope (ADR-2605241900), Murakumo-only (ADR-2605215000)",
+  "cleanroomInterop": {
+    "rule": "published API shapes + open standards ONLY; no vendor SDK / decompilation / trademarked code / fork (sumitsubo G1 + nv-compat)",
+    "openStandards": ["ROS 2 action/topic/service shapes", "DDS", "MCAP", "rosbag2", "LeRobot dataset schema", "Foxglove"],
+    "openSource": ["Open-RMF (Apache-2.0) task-allocation + fleet-adapter"],
+    "publishedApiShapes": ["Boston Dynamics Orbit REST/gRPC call shapes (neutral vocabulary; names in docstrings only)", "NVIDIA Isaac Sim/Lab via nv-compat (ADR-2605261800)"]
+  },
+  "forceClasses": ["observational", "soft-actuation", "powered-actuation"],
+  "weaponizableForceClass": "structurally unrepresentable (N1, Mission Charter §1.12 force-separation)",
+  "faces": {
+    "operation": {
+      "purpose": "transparent, member-signed, on-chain-logged fleet-management + teleoperation control plane",
+      "cells": ["fleet_registry", "mission_dispatch", "teleop_session", "telemetry_ingest"]
+    },
+    "learning": {
+      "purpose": "teleop trajectory -> consent-bound demonstration -> baien federated imitation policy -> supervised autonomy hand-off (the 手綱-release)",
+      "cells": ["demonstration_record", "policy_train", "autonomy_handoff"]
+    }
+  },
+  "scope": {
+    "phase": "R0 scaffold (design + teleop_safety method + teleop_session state-machine + :representative seed only)",
+    "scopeBoundary": "Clean-room control plane + learning loop for member-authorized, force-classified robot fleets",
+    "inScope": [
+      "Fleet registry / health / mission dispatch over robotics-body actors",
+      "Member-signed, time-boxed teleoperation sessions with deadman / e-stop / latency-budget / autonomy-fallback",
+      "Consent-bound demonstration capture (LeRobot-shaped) on the kotoba/IPFS/DataLad substrate",
+      "Federated imitation / behavior-cloning policy training in the baien edge envelope",
+      "Supervised autonomy hand-off with instant member takeback (SAE-L4 ceiling)"
+    ],
+    "deferredToR3PlusViaCouncil": [
+      "Benchtop :soft-actuation member-signed teleop on real hardware (R3, Council Lv6+ + operator)",
+      ":powered-actuation near humans / safety-rated / hard-RT live actuation (R5, Council Lv7+ + safety dossier)",
+      "Live displacement only with the Displacement Dividend active (G2)"
+    ]
+  },
+  "gates": ["G1 cleanroom-interop", "G2 displacement-dividend-coupling", "G3 transparent-force", "G4 no-server-key", "G5 murakumo-only", "G6 edge-envelope-policy", "G7 outward-gated", "G8 consent-bound-demonstration", "G9 privacy-by-construction", "G10 soft-rt-not-a-safety-system", "G11 kotoba-eavt-audit", "G12 sourcing-honesty"],
+  "nonGoals": ["N1 no weapons/force-as-harm", "N2 no surveillance/covert teleop", "N3 no non-member fleet operation", "N4 no gig-teleop marketplace", "N5 not a certified safety controller", "N6 no autonomy beyond SAE-L4 / no un-supervised policy promotion", "N7 no vendor SDK/firmware/weights bundling / no ToS evasion", "N8 no cash for demonstrations/operation"],
+  "status": "R0 proposed",
+  "charterRider": { "version": "2.0", "applied": true }
+}

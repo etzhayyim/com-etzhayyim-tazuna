@@ -1,0 +1,67 @@
+{:actor/id        "tazuna"
+ :actor/glyph     "綱"
+ :actor/tier      :tier-b
+ :actor/domain    "tazuna.etzhayyim.com"
+ :actor/did       "did:web:etzhayyim.com:actor:tazuna"
+ :actor/purpose   "Clean-room remote-robotics fleet operation + teleoperation + learning-from-demonstration (手綱 = the reins: hold them to guide a robot that does not yet know the path, release them as it earns autonomy). The charter-clean answer to the Boston-Dynamics-Orbit shape — the missing HEAD (transparent, member-signed, on-chain-logged fleet/teleop control plane) over the robotics bodies (sanae/kiyome/hataori/giemon/wadachi) and the missing LOOP (teleop trajectory -> consent-bound demonstration -> baien federated imitation policy -> supervised autonomy hand-off). Remote actuation is admitted ONLY as Transparent Force (on-chain + open-source + 1 SBT=1 vote) under no-server-key (member signs every command). Interop is clean-room: published API shapes + open standards only (Orbit REST shape / Open-RMF / ROS 2 / DDS / MCAP / rosbag2 / LeRobot / Foxglove; nv-compat Isaac), never a vendor SDK/decompile/trademark."
+ :actor/status    :r0
+ :actor/adr       "2606042100"
+ :actor/related   ["2606032100" "2606032130" "2606010600" "2605242600" "2605242630" "2605261800" "2606033600" "2605242000" "2605231525" "2605215000" "2605241900" "2606031600" "2605312345" "2605192100"]
+ :actor/labor
+ {:isic   ["C28" "J62"]
+  :isco   ["7", "8", "3139"]
+  :unspsc ["23" "43"]
+  :lps-rank nil
+  :note "horizontal control-plane over the ISCO 6-9 robotics bodies; operates the toil away rather than occupying one occupation"}
+
+ :actor/charter-rider {:rider/version "2.0" :rider/applied true}
+
+ ;; Clean-room interop tiers — published API shapes + open standards ONLY (G1). No vendor SDK / decompile / trademark.
+ :actor/interop-tiers
+ [{:tier/id "I1" :tier/kind :open-standard-transport :tier/preference 1 :tier/note "ROS 2 action/topic/service shapes + DDS (open standard); MCAP / rosbag2 open log containers; LeRobot dataset schema; Foxglove viz"}
+  {:tier/id "I2" :tier/kind :open-source-fleet     :tier/preference 2 :tier/note "Open-RMF (Apache-2.0) task-allocation + fleet-adapter concepts"}
+  {:tier/id "I3" :tier/kind :published-api-shape    :tier/preference 3 :tier/note "Boston Dynamics Orbit published REST/gRPC call SHAPES as a neutral vocabulary only (site/robot/mission/run); vendor names in docstrings only, like nv-compat"}]
+
+ ;; Force class on each robotDescriptor. :weaponizable is structurally unrepresentable (N1).
+ :actor/force-classes [:observational :soft-actuation :powered-actuation]
+
+ :actor/gates
+ [{:gate/id "G1" :gate/name "cleanroom-interop" :gate/req "published API shapes + open standards ONLY (Orbit REST shape / Open-RMF / ROS 2 / DDS / MCAP / rosbag2 / LeRobot / Foxglove; nv-compat Isaac); NO vendor SDK, decompilation, trademarked code, or fork (sumitsubo G1 + nv-compat); vendor names in adapter docstrings only"}
+  {:gate/id "G2" :gate/name "displacement-dividend-coupling" :gate/req "may not operate a fleet that displaces human labour LIVE unless the displaced cohort is registered for the tenure-weighted Displacement Dividend (ADR-2606032130); DEFINING gate inherited from the robotics wave"}
+  {:gate/id "G3" :gate/name "transparent-force" :gate/req "every teleopCommand = an on-chain-anchored Datom; control+skill code open-source Apache-2.0; force class + activation governed by 1 SBT=1 vote via etzhayyim-force-authorization (Mission Charter §1.12.B); a teleopGrant without a force-authorization ref cannot be built"}
+  {:gate/id "G4" :gate/name "no-server-key" :gate/req "the platform NEVER holds the key that commands a physical robot; teleopGrant serverHeldKey=false + encrypted-envelope ref only; every actuation command member-signed; server signature refused by construction (ADR-2605231525)"}
+  {:gate/id "G5" :gate/name "murakumo-only" :gate/req "all policy training/eval + any perception assist via LiteLLM 127.0.0.1:4000 / edge Murakumo only (ADR-2605215000); no commercial GPU rental in the religious-corp path"}
+  {:gate/id "G6" :gate/name "edge-envelope-policy" :gate/req "a shipped policyArtifact fits the baien edge envelope (WASM-32 + iPhone-12 + Android-4GB, frozen encoders; ADR-2605241900); larger policies = explicit baien-server-* carve-out"}
+  {:gate/id "G7" :gate/name "outward-gated" :gate/req "ANY live actuation / live fleet enrollment / live demonstration capture is Council Lv6+ + operator gated (Lv7+ for :powered-actuation near humans); R0-R2 = design + simulation + replay only"}
+  {:gate/id "G8" :gate/name "consent-bound-demonstration" :gate/req "demonstration episodes are the member's OWN labour data, encrypted (com.etzhayyim.encrypted.*), consent-scoped, cash=0 (a contribution, never paid work); part of the member's Wellbecoming trajectory (as-of, 非終末論)"}
+  {:gate/id "G9" :gate/name "privacy-by-construction" :gate/req "teleop into homes/private spaces is on-device only — NO cloud video to third parties, NO surveillance feed, NO biometric capture; teleop link encrypted end-to-end + operator-scoped (kiyome G9); a remotely-operated robot is the opposite of a spy"}
+  {:gate/id "G10" :gate/name "soft-rt-not-a-safety-system" :gate/req "deadman/e-stop/latency-fallback are best-effort soft-RT supervision; IEC 61508 / ISO 13849 safety-rated + hard-RT live actuation near humans = R5/Lv7+ (kotoba-os N2 precedent)"}
+  {:gate/id "G11" :gate/name "kotoba-eavt-audit" :gate/req "fleet, mission, every command, every demonstration, every hand-off = Datoms (as-of, replayable); member + public can audit exactly what was commanded and what was learned"}
+  {:gate/id "G12" :gate/name "sourcing-honesty" :gate/req ":representative fleet/registry; honest capability staging — real-world manipulation is unsolved, R-stages must not imply otherwise"}]
+
+ :actor/non-goals
+ [{:ng/id "N1" :ng/req "no weapons / fire-control / force-as-harm / dual-use-for-harm; :weaponizable force class is structurally unrepresentable (Mission Charter §1.12 force-separation)"}
+  {:ng/id "N2" :ng/req "no surveillance / covert teleop / third-party data harvesting; the robot is not a sensor platform for anyone but its consenting principal (G9)"}
+  {:ng/id "N3" :ng/req "no remote operation of a non-member's robot/account; operates only fleets the operator is authorized for (karakuri G1 / himotoki own-only)"}
+  {:ng/id "N4" :ng/req "not a commercial teleoperation-labor marketplace / gig-teleop substrate (anti-§1.13; the loop retires the toil, not relocates it to a remote gig worker)"}
+  {:ng/id "N5" :ng/req "not a certified safety controller / hard-RT live actuation near humans (R5/Lv7+; not this design)"}
+  {:ng/id "N6" :ng/req "no autonomy exceeding the wadachi SAE-L4 ceiling; no auto-promotion of a policy to live actuation without supervised hand-off + gate"}
+  {:ng/id "N7" :ng/req "no bundling/shipping of vendor SDK/firmware/weights; no evasion of a vendor ToS/anti-automation control (clean-room; karakuri N2 no-detection-evasion)"}
+  {:ng/id "N8" :ng/req "no cash payment for demonstrations or operation (no-payroll, cash=0; contribution -> vocation -> donation only)"}]
+
+ :actor/cells
+ [{:cell/id "fleet_registry"       :cell/kind :langgraph :cell/runtime :wasm :cell/node "reuben"   :cell/face :operation}
+  {:cell/id "mission_dispatch"     :cell/kind :langgraph :cell/runtime :wasm :cell/node "simeon"   :cell/face :operation}
+  {:cell/id "teleop_session"       :cell/kind :langgraph :cell/runtime :wasm :cell/node "levi"     :cell/face :operation :cell/coded true}
+  {:cell/id "telemetry_ingest"     :cell/kind :langgraph :cell/runtime :wasm :cell/node "judah"    :cell/face :operation}
+  {:cell/id "demonstration_record" :cell/kind :langgraph :cell/runtime :wasm :cell/node "zebulun"  :cell/face :learning}
+  {:cell/id "policy_train"         :cell/kind :langgraph :cell/runtime :wasm :cell/node "issachar" :cell/face :learning}
+  {:cell/id "autonomy_handoff"     :cell/kind :langgraph :cell/runtime :wasm :cell/node "dan"      :cell/face :learning}]
+
+ :actor/lex
+ [{:lex/id "robotDescriptor"}
+  {:lex/id "teleopGrant"}
+  {:lex/id "teleopCommand"}
+  {:lex/id "demonstrationEpisode"}
+  {:lex/id "policyArtifact"}
+  {:lex/id "autonomyHandoff"}]}

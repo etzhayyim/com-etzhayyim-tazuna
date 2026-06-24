@@ -1,0 +1,21 @@
+{:lexicon 1
+ :id "com.etzhayyim.tazuna.policyArtifact"
+ :defs
+ {:main
+  {:type "record"
+   :key "tid"
+   :record
+   {:type "object"
+    :required ["policyId" "bodyActor" "method" "trainedVia" "murakumoOnly" "edgeEnvelope" "promotion"]
+    :properties
+    {:policyId {:type "string" :description "stable policy id"}
+     :bodyActor {:type "string" :description "the robotics-body actor / skill the policy drives"}
+     :method {:type "string" :enum ["behavior-cloning" "imitation" "lfd"] :description "learning-from-demonstration method"}
+     :trainedVia {:type "string" :const "baien-federated" :description "G5 — baien federated (ADR-2605242600); larger sim policies are an explicit baien-server-* carve-out, not this record"}
+     :murakumoOnly {:type "boolean" :const true :description "G5 — Murakumo-only inference/training (ADR-2605215000); no commercial GPU"}
+     :edgeEnvelope {:type "boolean" :const true :description "G6 — fits WASM-32 / iPhone-12 / Android-4GB, frozen encoders (ADR-2605241900)"}
+     :episodeCids {:type "string" :description "serialized list of demonstrationEpisode CIDs trained on (provenance)"}
+     :policyCid {:type "string" :description "G11 — IPFS CID of the trained policy artifact"}
+     :evalScore {:type "integer" :description "sim eval score x1000 (kami-autodrive eval-gate); promotion threshold honest at R0"}
+     :promotion {:type "string" :enum ["sim-only" "supervised-handoff" "blocked"] :description "G7/N6 — never :live; auto-promotion to live actuation is impossible without supervised hand-off + gate"}
+     :trainedAt {:type "string" :format "datetime" :description "G11 — as-of history"}}}}}}

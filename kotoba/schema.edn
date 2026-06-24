@@ -1,0 +1,60 @@
+;; tazuna (手綱) kotoba EAVT schema — remote-robotics teleop + learning-from-demonstration (R0)
+;; Every command + demonstration + hand-off is a Datom (G11 audit; as-of, replayable; 非終末論).
+[;; ── fleet member (robotDescriptor) ────────────────────────────────────────────
+ {:db/ident :robot/id              :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :robot/body-actor      :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; sanae / hataori / kiyome / giemon / wadachi
+ {:db/ident :robot/force-class     :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :observational :soft-actuation :powered-actuation (N1: no :weaponizable)
+ {:db/ident :robot/transport       :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :ros2-dds :open-rmf :orbit-rest-shape (G1 clean-room)
+ {:db/ident :robot/capabilities    :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}
+ {:db/ident :robot/edge-envelope   :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G6
+ {:db/ident :robot/force-auth-ref  :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; G3 1 SBT=1 vote admission
+ {:db/ident :robot/representative  :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G12
+
+ ;; ── teleop grant (NO server key — only references; G4) ────────────────────────
+ {:db/ident :grant/id              :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :grant/robot           :db/valueType :db.type/ref     :db/cardinality :db.cardinality/one}
+ {:db/ident :grant/principal       :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; G4 :member
+ {:db/ident :grant/server-held-key :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G4 false
+ {:db/ident :grant/secret-ref      :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; encrypted-envelope ref ONLY (ADR-2605181100)
+ {:db/ident :grant/force-auth-ref  :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; G3 required
+ {:db/ident :grant/deadman-ms      :db/valueType :db.type/long    :db/cardinality :db.cardinality/one}   ;; G10
+ {:db/ident :grant/latency-budget-ms :db/valueType :db.type/long  :db/cardinality :db.cardinality/one}   ;; G10
+ {:db/ident :grant/on-chain-anchor :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G3/G11
+
+ ;; ── teleop command (the transparent-force log entry; one Datom each) ──────────
+ {:db/ident :cmd/id                :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :cmd/grant             :db/valueType :db.type/ref     :db/cardinality :db.cardinality/one}
+ {:db/ident :cmd/kind              :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :move :manipulate :halt :estop :handback
+ {:db/ident :cmd/member-sig        :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; G4 required for actuation
+ {:db/ident :cmd/server-sig        :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; G4 must be empty
+ {:db/ident :cmd/dry-run           :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G7 R0 always true
+ {:db/ident :cmd/safe-state        :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :nominal :deadman-lapse :latency-breach :estopped :autonomy-fallback
+ {:db/ident :cmd/anchor-root       :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; G3/G11 commit-DAG root
+
+ ;; ── demonstration episode (the member's labour; LeRobot-shaped) ───────────────
+ {:db/ident :episode/id            :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :episode/robot         :db/valueType :db.type/ref     :db/cardinality :db.cardinality/one}
+ {:db/ident :episode/schema        :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :lerobot-v2 (G1 open schema)
+ {:db/ident :episode/frame-count   :db/valueType :db.type/long    :db/cardinality :db.cardinality/one}
+ {:db/ident :episode/cid           :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}   ;; IPFS/DataLad
+ {:db/ident :episode/consent       :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G8 true
+ {:db/ident :episode/encrypted     :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G8 true
+ {:db/ident :episode/cash          :db/valueType :db.type/long    :db/cardinality :db.cardinality/one}   ;; G8/N8 const 0
+
+ ;; ── policy artifact (learned from demonstrations; baien edge envelope) ────────
+ {:db/ident :policy/id             :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :policy/body-actor     :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}
+ {:db/ident :policy/method         :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :behavior-cloning :imitation :lfd
+ {:db/ident :policy/trained-via    :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :baien-federated (G5)
+ {:db/ident :policy/edge-envelope  :db/valueType :db.type/boolean :db/cardinality :db.cardinality/one}   ;; G6
+ {:db/ident :policy/cid            :db/valueType :db.type/string  :db/cardinality :db.cardinality/one}
+ {:db/ident :policy/eval-score     :db/valueType :db.type/long    :db/cardinality :db.cardinality/one}   ;; x1000
+ {:db/ident :policy/promotion      :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :sim-only :supervised-handoff :blocked (never :live)
+
+ ;; ── autonomy hand-off (the 手綱-release) ──────────────────────────────────────
+ {:db/ident :handoff/id            :db/valueType :db.type/string  :db/cardinality :db.cardinality/one :db/unique :db.unique/identity}
+ {:db/ident :handoff/policy        :db/valueType :db.type/ref     :db/cardinality :db.cardinality/one}
+ {:db/ident :handoff/robot         :db/valueType :db.type/ref     :db/cardinality :db.cardinality/one}
+ {:db/ident :handoff/supervision   :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}   ;; :member-attended :operator-attended
+ {:db/ident :handoff/takeback-latency-ms :db/valueType :db.type/long :db/cardinality :db.cardinality/one}
+ {:db/ident :handoff/sae-ceiling   :db/valueType :db.type/keyword :db/cardinality :db.cardinality/one}]  ;; :L4 (N6)

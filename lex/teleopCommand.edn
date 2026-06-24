@@ -1,0 +1,20 @@
+{:lexicon 1
+ :id "com.etzhayyim.tazuna.teleopCommand"
+ :defs
+ {:main
+  {:type "record"
+   :key "tid"
+   :record
+   {:type "object"
+    :required ["grantId" "robotId" "kind" "memberSig" "serverSig" "dryRun" "safeState"]
+    :properties
+    {:grantId {:type "string" :description "the teleopGrant authorizing this command"}
+     :robotId {:type "string" :description "target robot"}
+     :kind {:type "string" :enum ["move" "manipulate" "halt" "estop" "handback"] :description "command class; :estop and :halt are always permitted"}
+     :payload {:type "string" :description "serialized open-transport command (ROS 2 action / Open-RMF task shape); never proprietary"}
+     :memberSig {:type "string" :description "G4 — member operator Ed25519 signature; REQUIRED for any actuation command"}
+     :serverSig {:type "string" :const "" :description "G4 — must remain empty; a server signature is refused by construction (ADR-2605231525)"}
+     :dryRun {:type "boolean" :const true :description "G7 — R0 is plan/replay only; live actuation Council Lv6+ + operator gated"}
+     :safeState {:type "string" :enum ["nominal" "deadman-lapse" "latency-breach" "estopped" "autonomy-fallback"] :description "G10 — safety reasoner verdict (methods/teleop_safety.py)"}
+     :issuedAt {:type "string" :format "datetime" :description "G11 — as-of command history"}
+     :anchorRoot {:type "string" :description "G3/G11 — commit-DAG root this command is anchored under on Base L2"}}}}}}

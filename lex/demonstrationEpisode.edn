@@ -1,0 +1,22 @@
+{:lexicon 1
+ :id "com.etzhayyim.tazuna.demonstrationEpisode"
+ :defs
+ {:main
+  {:type "record"
+   :key "tid"
+   :record
+   {:type "object"
+    :required ["episodeId" "robotId" "demonstrator" "schema" "consent" "encrypted" "cash" "frameCount"]
+    :properties
+    {:episodeId {:type "string" :description "stable episode id"}
+     :robotId {:type "string" :description "the robot teleoperated during the episode"}
+     :grantId {:type "string" :description "the teleopGrant the episode was recorded under"}
+     :demonstrator {:type "string" :const "member" :description "G8 — the demonstration is the member's OWN labour"}
+     :schema {:type "string" :enum ["lerobot-v2"] :description "G1 — open dataset schema (observation frames + commanded actions); no proprietary teleop format"}
+     :frameCount {:type "integer" :description "number of state-action frames in the trajectory"}
+     :datasetCid {:type "string" :description "G11 — IPFS/DataLad CID of the episode blob (80-data/tazuna, no-git-lfs)"}
+     :consent {:type "boolean" :const true :description "G8 — consent-scoped capture of the member's labour data"}
+     :encrypted {:type "boolean" :const true :description "G8 — encrypted envelope (com.etzhayyim.encrypted.*)"}
+     :cash {:type "integer" :const 0 :description "G8/N8 — cash=0; a contribution -> vocation -> donation, never paid work (ADR-2605301020 N1)"}
+     :wellbecomingRef {:type "string" :description "part of the member's Wellbecoming trajectory (as-of); no terminal 'trained' state (非終末論)"}
+     :recordedAt {:type "string" :format "datetime" :description "G11 — as-of history"}}}}}}
