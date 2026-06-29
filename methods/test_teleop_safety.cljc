@@ -1,121 +1,95 @@
+;; Clojure mirror of methods/test_teleop_safety.py — tazuna 手綱 teleop-safety reasoner.
 (ns tazuna.methods.test-teleop-safety
-  "Tests for the tazuna teleop-safety reasoner (ADR-2606042100).
+  "1:1 port of the teleop_safety.py suite: N1 force-class admission, G3 Transparent
+  Force, G4 no-server-key, G10 soft-RT supervision (deadman > latency priority),
+  e-stop/halt/handback always honoured, G7 advisory-only, unknown-kind rejection.
+  Errors are checked by the ex-info :error tag (≡ the Python exception subclass).
 
-  1:1 Clojure port of `20-actors/tazuna/methods/test_teleop_safety.py`.
-  Stdlib + clojure.test only. Parametrized Python cases are expanded into
-  separate `(is ...)` forms."
-  (:require [clojure.test :refer [deftest is testing]]
-            [tazuna.methods.teleop-safety :as sut]))
+  Run:  bb --classpath 20-actors 20-actors/tazuna/methods/test_teleop_safety.clj"
+  (:require [tazuna.methods.teleop-safety :as t]
+            [clojure.string :as str]
+            [clojure.test :refer [deftest is run-tests]]))
 
-(def ^:private AUTHORIZED
-  (sut/make-grant "soft-actuation" "forceauth:sanae-soft-001" 300 150))
+(def AUTHORIZED (t/grant {:force-class "soft-actuation" :force-auth-ref "forceauth:sanae-soft-001"
+                          :deadman-ms 300 :latency-budget-ms 150}))
 
-;; ── N1: force-class admission ────────────────────────────────────────────────
-(deftest test-weaponizable-force-class-is-unrepresentable
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/admit-session (sut/make-grant "weaponizable" "x")))))
+(defn- error-tag
+  "Run f; return the :error tag of the ex-info it throws, or nil if it doesn't throw."
+  [f]
+  (try (f) nil (catch clojure.lang.ExceptionInfo e (:error (ex-data e)))))
 
-(deftest test-arbitrary-force-class-refused
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/admit-session (sut/make-grant "lethal" "x")))))
+;; ── N1: force-class admission ──
+(deftest weaponizable-force-class-unrepresentable
+  (is (= :force-class (error-tag #(t/admit-session (t/grant {:force-class "weaponizable" :force-auth-ref "x"}))))))
 
-(deftest test-admitted-force-classes-pass-observational
-  (is (nil? (sut/admit-session (sut/make-grant "observational" "forceauth:ok")))))
+(deftest arbitrary-force-class-refused
+  (is (= :force-class (error-tag #(t/admit-session (t/grant {:force-class "lethal" :force-auth-ref "x"}))))))
 
-(deftest test-admitted-force-classes-pass-soft-actuation
-  (is (nil? (sut/admit-session (sut/make-grant "soft-actuation" "forceauth:ok")))))
+(deftest admitted-force-classes-pass
+  (doseq [fc ["observational" "soft-actuation" "powered-actuation"]]
+    (is (nil? (t/admit-session (t/grant {:force-class fc :force-auth-ref "forceauth:ok"}))))))
 
-(deftest test-admitted-force-classes-pass-powered-actuation
-  (is (nil? (sut/admit-session (sut/make-grant "powered-actuation" "forceauth:ok")))))
+;; ── G3: Transparent Force ──
+(deftest grant-without-force-auth-ref-refused
+  (is (= :transparent-force (error-tag #(t/admit-session (t/grant {:force-class "soft-actuation" :force-auth-ref ""}))))))
 
-;; ── G3: Transparent Force ────────────────────────────────────────────────────
-(deftest test-grant-without-force-auth-ref-refused
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/admit-session (sut/make-grant "soft-actuation" "")))))
+(deftest actuation-refused-without-force-auth-even-if-signed
+  (is (= :transparent-force
+         (error-tag #(t/evaluate (t/command "move" {:member-sig "m:sig"})
+                                 (t/grant {:force-class "soft-actuation" :force-auth-ref ""}))))))
 
-(deftest test-actuation-refused-without-force-auth-even-if-signed
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/evaluate (sut/make-command "move" :member-sig "m:sig")
-                             (sut/make-grant "soft-actuation" "")))))
+;; ── G4: no-server-key ──
+(deftest server-signature-always-refused
+  (is (= :no-server-key
+         (error-tag #(t/evaluate (t/command "move" {:member-sig "m:sig" :server-sig "s:sig"}) AUTHORIZED)))))
 
-;; ── G4: no-server-key ────────────────────────────────────────────────────────
-(deftest test-server-signature-always-refused
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/evaluate (sut/make-command "move" :member-sig "m:sig"
-                                               :server-sig "s:sig")
-                             AUTHORIZED))))
+(deftest actuation-requires-member-signature
+  (is (= :no-server-key (error-tag #(t/evaluate (t/command "move" {:member-sig ""}) AUTHORIZED)))))
 
-(deftest test-actuation-requires-member-signature
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/evaluate (sut/make-command "move" :member-sig "")
-                             AUTHORIZED))))
+(deftest nominal-actuation-passes
+  (let [v (t/evaluate (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40}) AUTHORIZED)]
+    (is (= "nominal" (:safe-state v)))
+    (is (true? (:actuates v)))
+    (is (= "move" (:effective-kind v)))))
 
-(deftest test-nominal-actuation-is-member-signed-and-passes
-  (let [v (sut/evaluate (sut/make-command "move" :member-sig "m:sig"
-                                          :observed-latency-ms 40)
-                        AUTHORIZED)]
-    (is (= (:safe-state v) "nominal"))
-    (is (= (:actuates v) true))
-    (is (= (:effective-kind v) "move"))))
+;; ── G10: soft-RT supervision ──
+(deftest deadman-lapse-forces-autonomy-fallback-halt
+  (let [v (t/evaluate (t/command "move" {:member-sig "m:sig" :elapsed-since-presence-ms 900}) AUTHORIZED)]
+    (is (= "autonomy-fallback" (:safe-state v)))
+    (is (false? (:actuates v)))
+    (is (= "halt" (:effective-kind v)))
+    (is (str/includes? (:reason v) "deadman"))))
 
-;; ── G10: soft-RT supervision ─────────────────────────────────────────────────
-(deftest test-deadman-lapse-forces-autonomy-fallback-halt
-  (let [v (sut/evaluate (sut/make-command "move" :member-sig "m:sig"
-                                          :elapsed-since-presence-ms 900)
-                        AUTHORIZED)]
-    (is (= (:safe-state v) "autonomy-fallback"))
-    (is (= (:actuates v) false))
-    (is (= (:effective-kind v) "halt"))
-    (is (clojure.string/includes? (:reason v) "deadman"))))
+(deftest latency-breach-forces-autonomy-fallback-halt
+  (let [v (t/evaluate (t/command "move" {:member-sig "m:sig" :observed-latency-ms 400}) AUTHORIZED)]
+    (is (= "autonomy-fallback" (:safe-state v)))
+    (is (= "halt" (:effective-kind v)))
+    (is (str/includes? (:reason v) "latency"))))
 
-(deftest test-latency-breach-forces-autonomy-fallback-halt
-  (let [v (sut/evaluate (sut/make-command "move" :member-sig "m:sig"
-                                          :observed-latency-ms 400)
-                        AUTHORIZED)]
-    (is (= (:safe-state v) "autonomy-fallback"))
-    (is (= (:actuates v) false))
-    (is (= (:effective-kind v) "halt"))
-    (is (clojure.string/includes? (:reason v) "latency"))))
+(deftest deadman-takes-priority-over-latency
+  (let [v (t/evaluate (t/command "move" {:member-sig "m:sig" :elapsed-since-presence-ms 900
+                                         :observed-latency-ms 400}) AUTHORIZED)]
+    (is (str/includes? (:reason v) "deadman"))))
 
-(deftest test-deadman-takes-priority-over-latency
-  (let [v (sut/evaluate (sut/make-command "move" :member-sig "m:sig"
-                                          :elapsed-since-presence-ms 900
-                                          :observed-latency-ms 400)
-                        AUTHORIZED)]
-    (is (clojure.string/includes? (:reason v) "deadman"))))
+(deftest estop-always-honoured-without-signature
+  (let [v (t/evaluate (t/command "estop") AUTHORIZED)]
+    (is (= "estopped" (:safe-state v)))
+    (is (false? (:actuates v)))))
 
-(deftest test-estop-always-honoured-without-signature
-  (let [v (sut/evaluate (sut/make-command "estop") AUTHORIZED)]
-    (is (= (:safe-state v) "estopped"))
-    (is (= (:actuates v) false))))
+(deftest halt-and-handback-need-no-signature
+  (is (= "halt" (:effective-kind (t/evaluate (t/command "halt") AUTHORIZED))))
+  (is (= "handback" (:effective-kind (t/evaluate (t/command "handback") AUTHORIZED)))))
 
-(deftest test-halt-and-handback-need-no-signature
-  (is (= (:effective-kind (sut/evaluate (sut/make-command "halt") AUTHORIZED))
-         "halt"))
-  (is (= (:effective-kind (sut/evaluate (sut/make-command "handback") AUTHORIZED))
-         "handback")))
+(deftest estop-honoured-even-with-breached-supervision
+  (is (= "estopped" (:safe-state (t/evaluate (t/command "estop" {:elapsed-since-presence-ms 99999}) AUTHORIZED)))))
 
-(deftest test-estop-honoured-even-with-breached-supervision
-  ;; an e-stop must work regardless of deadman/latency state
-  (let [v (sut/evaluate (sut/make-command "estop"
-                                          :elapsed-since-presence-ms 99999)
-                        AUTHORIZED)]
-    (is (= (:safe-state v) "estopped"))))
+;; ── G7 advisory-only + unknown kind ──
+(deftest actuation-is-advisory-only-at-r0
+  (is (true? (:actuates (t/evaluate (t/command "manipulate" {:member-sig "m:sig" :observed-latency-ms 10}) AUTHORIZED)))))
 
-;; ── G7: never live at R0 ─────────────────────────────────────────────────────
-(deftest test-actuation-is-advisory-only-at-r0
-  ;; evaluate() returns a verdict; it never performs a live actuation.
-  ;; `actuates` is a permission flag the cell still routes through dry-run +
-  ;; operator/Council gate (G7).
-  (let [v (sut/evaluate (sut/make-command "manipulate" :member-sig "m:sig"
-                                          :observed-latency-ms 10)
-                        AUTHORIZED)]
-    (is (= (:actuates v) true))
-    ;; ...but the lexicon pins dryRun const true and outwardGated const true;
-    ;; no live call here.
-    ))
+(deftest unknown-command-kind-rejected
+  (is (= :value-error (error-tag #(t/evaluate (t/command "teleport" {:member-sig "m:sig"}) AUTHORIZED)))))
 
-(deftest test-unknown-command-kind-rejected
-  (is (thrown? clojure.lang.ExceptionInfo
-               (sut/evaluate (sut/make-command "teleport" :member-sig "m:sig")
-                             AUTHORIZED))))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [{:keys [fail error]} (run-tests 'tazuna.methods.test-teleop-safety)]
+    (System/exit (if (zero? (+ fail error)) 0 1))))
