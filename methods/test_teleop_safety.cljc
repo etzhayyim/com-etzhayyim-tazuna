@@ -90,6 +90,69 @@
 (deftest unknown-command-kind-rejected
   (is (= :value-error (error-tag #(t/evaluate (t/command "teleport" {:member-sig "m:sig"}) AUTHORIZED)))))
 
+;; ── G10 extension: evaluate-session link-quality hysteresis (satellite/high-jitter link) ──
+(deftest session-single-spike-trips-fallback-instantly
+  (let [verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})]
+                  AUTHORIZED)]
+    (is (= ["nominal" "autonomy-fallback"] (map :safe-state verdicts)))))
+
+(deftest session-single-good-sample-does-not-re-arm-actuation
+  ;; recovery-samples defaults to 3: ONE good sample right after a breach must not resume nominal.
+  (let [verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})]
+                  AUTHORIZED)]
+    (is (= "autonomy-fallback" (:safe-state (second verdicts))))
+    (is (false? (:actuates (second verdicts))))
+    (is (str/includes? (:reason (second verdicts)) "recovering"))))
+
+(deftest session-resumes-nominal-after-consecutive-recovery-samples
+  (let [g (t/grant {:force-class "soft-actuation" :force-auth-ref "forceauth:ok" :recovery-samples 2})
+        verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})]
+                  g)]
+    (is (= ["autonomy-fallback" "autonomy-fallback" "nominal"] (map :safe-state verdicts)))
+    (is (true? (:actuates (last verdicts))))))
+
+(deftest session-blip-during-recovery-resets-the-counter
+  (let [g (t/grant {:force-class "soft-actuation" :force-auth-ref "forceauth:ok" :recovery-samples 2})
+        verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})]
+                  g)]
+    (is (= ["autonomy-fallback" "autonomy-fallback" "autonomy-fallback" "autonomy-fallback" "nominal"]
+           (map :safe-state verdicts)))))
+
+(deftest session-deadman-lapse-stays-instant-and-does-not-consume-hysteresis
+  (let [verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :elapsed-since-presence-ms 900})
+                   (t/command "move" {:member-sig "m:sig" :observed-latency-ms 40})]
+                  AUTHORIZED)]
+    (is (str/includes? (:reason (first verdicts)) "deadman"))
+    ;; a deadman-lapsed tick never touches link-state, so the very next in-budget sample
+    ;; resumes nominal immediately — deadman recovery is NOT gated by the latency window.
+    (is (= "nominal" (:safe-state (second verdicts))))))
+
+(deftest session-estop-mid-session-remains-instant
+  (let [verdicts (t/evaluate-session
+                  [(t/command "move" {:member-sig "m:sig" :observed-latency-ms 400})
+                   (t/command "estop")]
+                  AUTHORIZED)]
+    (is (= "estopped" (:safe-state (second verdicts))))))
+
+(deftest satellite-leo-grant-defaults-tolerate-normal-handoff-jitter
+  (let [g (t/grant (merge t/satellite-leo-grant-defaults
+                          {:force-class "soft-actuation" :force-auth-ref "forceauth:ok"}))
+        v (t/evaluate (t/command "move" {:member-sig "m:sig" :observed-latency-ms 250}) g)]
+    (is (= "nominal" (:safe-state v)))))
+
 (when (= *file* (System/getProperty "babashka.file"))
   (let [{:keys [fail error]} (run-tests 'tazuna.methods.test-teleop-safety)]
     (System/exit (if (zero? (+ fail error)) 0 1))))

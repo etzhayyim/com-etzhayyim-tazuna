@@ -47,14 +47,21 @@ Open-RMF (Apache-2.0), and the Boston Dynamics Orbit REST/gRPC call *shapes* as 
 ## Build / test
 
 ```
-cd methods && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop-safety reasoner (18 tests)
-cd cells   && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop_session state machine (11 tests)
+cd methods && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop-safety reasoner (23 tests, incl. satellite-link hysteresis)
+cd cells   && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop_session state machine (14 tests, incl. satellite-link hysteresis)
 python3 methods/teleop_safety.py                                   # offline safety-reasoner demo
 ```
 
 R0 = design + the `teleop_safety` reasoner + the `teleop_session` state-machine + a `:representative`
 fleet seed. **No hardware, no live robot link, no live actuation** — every adapter call is gated
 Council Lv6+ + operator (Lv7+ for `:powered-actuation` near humans), G7.
+
+**Satellite/high-jitter-link hysteresis (G10 extension, still R0/advisory-only, no live link):**
+both the reasoner and the state machine gate latency-budget recovery on `recovery-samples`
+CONSECUTIVE in-budget samples — a breach still trips autonomy-fallback instantly (fail-fast),
+but a single lucky sample amid a jitter-prone relay (e.g. a Starlink-class LEO link mid
+beam-handoff) can no longer re-arm actuation on its own. Deadman/e-stop stay instant, unaffected.
+See `teleop_safety/evaluate-session` and `state_machine/safe-state`.
 
 ## Do not
 
