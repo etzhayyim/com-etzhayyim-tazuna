@@ -46,8 +46,8 @@ bundling / no ToS evasion · N8 no cash for demonstrations/operation.
 ## Build / test
 
 ```
-cd methods && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop-safety reasoner (18 tests)
-cd cells   && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop_session state machine (11 tests)
+cd methods && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop-safety reasoner (23 tests, incl. satellite-link hysteresis)
+cd cells   && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest   # teleop_session state machine (14 tests, incl. satellite-link hysteresis)
 python3 methods/teleop_safety.py                                   # offline demo
 ```
 
