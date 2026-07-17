@@ -32,13 +32,20 @@ paths:
 
   - from: methods/teleop_safety.cljc
     to: methods/teleop_safety.kotoba
-    disposition: kotoba
-    status: blocked
-    reason: Safety-critical deterministic Kotoba reasoner, not a standard-host adapter.
+    disposition: split
+    status: migrated
+    reason: >-
+      The safety decision kernel is canonical Kotoba. Rich map/string adaptation,
+      exception reporting, and link-session orchestration remain a standard Clojure
+      reference implementation in methods/teleop_safety.clj.
     evidence:
       kotoba_check: pass
-      kotoba_web_compile: fail
-      first_web_gap: capability-safe namespace/module clauses and structured string/map/set values
+      kotoba_web_compile: pass
+      generated_js_syntax: pass
+      generated_js_execution: pass
+      generated_main_result: 0
+      clojure_reference_tests: pass
+      native_release: https://github.com/kotoba-lang/kotoba/releases/tag/v0.6.2
 
   - from: cells/teleop_session/test_state_machine.cljc
     to: cells/teleop_session/test_state_machine.clj
@@ -72,13 +79,17 @@ verification:
       (load-file "cells/teleop_session/test_state_machine.clj")
       (clojure.test/run-tests (quote tazuna.cells.teleop-session.test-state-machine))'
     - >-
-      bb -e '(load-file "methods/teleop_safety.cljc")
+      bb -e '(load-file "methods/teleop_safety.clj")
       (load-file "methods/test_teleop_safety.clj")
       (clojure.test/run-tests (quote tazuna.methods.test-teleop-safety))'
+    - kotoba check methods/teleop_safety.kotoba --json
+    - kotoba compile methods/teleop_safety.kotoba --target web -o teleop_safety.mjs --json
+    - node --check teleop_safety.mjs
+    - node -e 'import("./teleop_safety.mjs").then(async m => console.log(await m.instantiateKotoba().main()))'
     - >-
       bb -e '(load-file "methods/test_charter_gates.clj")
       (clojure.test/run-tests (quote tazuna.methods.test-charter-gates))'
-  kotoba_release_tested: 0.6.1
+  kotoba_release_tested: 0.6.2
   notes:
-    - Source renames remain prohibited until both kotoba check and target-web compilation pass.
+    - Murakumo and state-machine source renames remain prohibited until both kotoba check and target-web compilation pass.
     - A filename-only migration must not bypass the structured-value compiler gap.
