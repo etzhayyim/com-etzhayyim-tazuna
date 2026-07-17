@@ -110,7 +110,7 @@
 
 (defn- latency-hysteresis
   "G10 extension: link-quality hysteresis for the latency-budget dimension only (mirrors
-  methods/teleop_safety.cljc's link-recover). A breach trips fallback immediately
+  methods/teleop_safety.clj's link-recover). A breach trips fallback immediately
   (fail-fast); clearing it back to nominal requires `recovery_samples` CONSECUTIVE
   in-budget samples (fail-safe against flapping actuation on/off across a single lucky
   sample amid a jitter-prone link, e.g. LEO satellite beam handoffs). Returns
