@@ -82,7 +82,7 @@
              (count (:effects plan)))))))
 
 (deftest cell-plan-throws-on-unknown-cell
-  (is (thrown? #?(:clj clojure.lang.ExceptionInfo :cljs ExceptionInfo)
+  (is (thrown? clojure.lang.ExceptionInfo
                (m/cell-plan :totally-not-a-real-cell {}))))
 
 (deftest all-cell-plans-covers-every-cell

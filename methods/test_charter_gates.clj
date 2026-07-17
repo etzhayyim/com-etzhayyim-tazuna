@@ -23,13 +23,11 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
-#?(:clj
-   (do
-     (def ^:private here (.getParentFile (java.io.File. ^String *file*)))      ;; methods/
-     (def ^:private actor-dir (.getParentFile here))                          ;; tazuna/
-     (def ^:private lexdir (java.io.File. actor-dir "lex"))
-     (defn- lex [name]
-       (edn/read-string (slurp (java.io.File. lexdir (str name ".edn")))))))
+(def ^:private here (.getParentFile (java.io.File. ^String *file*)))      ;; methods/
+(def ^:private actor-dir (.getParentFile here))                          ;; tazuna/
+(def ^:private lexdir (java.io.File. actor-dir "lex"))
+(defn- lex [name]
+  (edn/read-string (slurp (java.io.File. lexdir (str name ".edn")))))
 
 (defn- record-node [doc] (get-in doc [:defs :main :record]))
 (defn- required-of [doc] (set (:required (record-node doc))))
@@ -89,7 +87,6 @@
   (is (= #{"sim-only" "supervised-handoff" "blocked"} (enum-of (lex "policyArtifact") :promotion))
       "policy promotion is bounded {sim-only, supervised-handoff, blocked}"))
 
-#?(:clj
-   (defn -main [& _]
-     (let [r (run-tests 'tazuna.methods.test-charter-gates)]
-       (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1)))))
+(defn -main [& _]
+  (let [r (run-tests 'tazuna.methods.test-charter-gates)]
+    (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1))))

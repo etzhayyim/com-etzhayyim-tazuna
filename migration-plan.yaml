@@ -1,0 +1,84 @@
+schema: kotoba-source-migration/v1
+repository: etzhayyim/com-etzhayyim-tazuna
+baseline_commit: efb4688
+status: in-progress
+policy:
+  canonical_kotoba: .kotoba
+  standard_clojure: .clj
+  shared_three_target: .cljc
+  jvm_runtime_required: false
+
+paths:
+  - from: src/tazuna/murakumo.cljc
+    to: src/tazuna/murakumo.kotoba
+    disposition: kotoba
+    status: blocked
+    reason: Canonical Murakumo actor boundary, not a three-target host library.
+    evidence:
+      kotoba_check: pass
+      kotoba_web_compile: fail
+      first_web_gap: capability-safe namespace/module clauses and structured string/map values
+
+  - from: cells/teleop_session/state_machine.cljc
+    to: cells/teleop_session/state_machine.kotoba
+    disposition: kotoba
+    status: blocked
+    reason: Safety-critical canonical Kotoba teleoperation state machine.
+    evidence:
+      kotoba_check_after_runtime_fix: pass
+      runtime_fix: https://github.com/kotoba-lang/kotoba/pull/331
+      kotoba_web_compile: fail
+      first_web_gap: capability-safe namespace/module clauses and structured string/map/set values
+
+  - from: methods/teleop_safety.cljc
+    to: methods/teleop_safety.kotoba
+    disposition: kotoba
+    status: blocked
+    reason: Safety-critical deterministic Kotoba reasoner, not a standard-host adapter.
+    evidence:
+      kotoba_check: pass
+      kotoba_web_compile: fail
+      first_web_gap: capability-safe namespace/module clauses and structured string/map/set values
+
+  - from: cells/teleop_session/test_state_machine.cljc
+    to: cells/teleop_session/test_state_machine.clj
+    disposition: clj
+    status: migrated
+    reason: Standard clojure.test host test; it does not claim CLJS or Kotoba portability.
+
+  - from: methods/test_charter_gates.cljc
+    to: methods/test_charter_gates.clj
+    disposition: clj
+    status: migrated
+    reason: Babashka/Clojure filesystem and EDN test using java.io.File.
+
+  - from: methods/test_teleop_safety.cljc
+    to: methods/test_teleop_safety.clj
+    disposition: clj
+    status: migrated
+    reason: Babashka/Clojure test; its own run instruction already names the .clj contract.
+
+  - from: test/tazuna/murakumo_test.cljc
+    to: test/tazuna/murakumo_test.clj
+    disposition: clj
+    status: migrated
+    reason: Repository-native clojure.test suite loaded through the :test alias.
+
+verification:
+  required:
+    - clojure -M:test
+    - >-
+      bb -e '(load-file "cells/teleop_session/state_machine.cljc")
+      (load-file "cells/teleop_session/test_state_machine.clj")
+      (clojure.test/run-tests (quote tazuna.cells.teleop-session.test-state-machine))'
+    - >-
+      bb -e '(load-file "methods/teleop_safety.cljc")
+      (load-file "methods/test_teleop_safety.clj")
+      (clojure.test/run-tests (quote tazuna.methods.test-teleop-safety))'
+    - >-
+      bb -e '(load-file "methods/test_charter_gates.clj")
+      (clojure.test/run-tests (quote tazuna.methods.test-charter-gates))'
+  kotoba_release_tested: 0.6.1
+  notes:
+    - Source renames remain prohibited until both kotoba check and target-web compilation pass.
+    - A filename-only migration must not bypass the structured-value compiler gap.
