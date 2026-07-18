@@ -43,7 +43,7 @@
 #?(:clj
    (do
      (def ^:private here (.getParentFile (java.io.File. ^String *file*)))      ;; methods/
-     (def ^:private actor-dir (.getParentFile here))                          ;; tazuna/
+     (def ^:private actor-dir (java.io.File. (System/getProperty "user.dir")))
      (def ^:private lexdir (java.io.File. actor-dir "lex"))
      (defn- lex [name]
        (reconstitute-entity
