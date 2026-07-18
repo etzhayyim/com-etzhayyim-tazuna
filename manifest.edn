@@ -1,6 +1,7 @@
 {:actor/id        "tazuna"
  :actor/glyph     "綱"
  :actor/tier      :tier-b
+ :actor/integrates ["hataori" "kiyome" "sanae" "wadachi"]
  :actor/domain    "tazuna.etzhayyim.com"
  :actor/did       "did:web:etzhayyim.com:actor:tazuna"
  :actor/purpose   "Clean-room remote-robotics fleet operation + teleoperation + learning-from-demonstration (手綱 = the reins: hold them to guide a robot that does not yet know the path, release them as it earns autonomy). The charter-clean answer to the Boston-Dynamics-Orbit shape — the missing HEAD (transparent, member-signed, on-chain-logged fleet/teleop control plane) over the robotics bodies (sanae/kiyome/hataori/giemon/wadachi) and the missing LOOP (teleop trajectory -> consent-bound demonstration -> baien federated imitation policy -> supervised autonomy hand-off). Remote actuation is admitted ONLY as Transparent Force (on-chain + open-source + 1 SBT=1 vote) under no-server-key (member signs every command). Interop is clean-room: published API shapes + open standards only (Orbit REST shape / Open-RMF / ROS 2 / DDS / MCAP / rosbag2 / LeRobot / Foxglove; nv-compat Isaac), never a vendor SDK/decompile/trademark."

@@ -1,19 +1,4 @@
-{:lexicon 1
- :id "com.etzhayyim.tazuna.autonomyHandoff"
- :defs
- {:main
-  {:type "record"
-   :key "tid"
-   :record
-   {:type "object"
-    :required ["handoffId" "policyId" "robotId" "supervision" "takebackLatencyMs" "saeCeiling" "outwardGated"]
-    :properties
-    {:handoffId {:type "string" :description "stable hand-off id"}
-     :policyId {:type "string" :description "the policyArtifact handed the reins"}
-     :robotId {:type "string" :description "the robot under supervised autonomy"}
-     :supervision {:type "string" :enum ["member-attended" "operator-attended"] :description "N6 — autonomy runs only under supervision; never unattended at this design"}
-     :takebackLatencyMs {:type "integer" :description "max latency for the member to take the reins back (instant-takeback discipline, wadachi SAE-L4)"}
-     :saeCeiling {:type "string" :const "L4" :description "N6 — autonomy may not exceed the wadachi SAE-L4 ceiling (ADR-2605242000)"}
-     :exceptionToTeleop {:type "boolean" :description "on exception, control returns to member teleop (closes the loop)"}
-     :outwardGated {:type "boolean" :const true :description "G7 — live supervised autonomy Council Lv6+ + operator gated (Lv7+ for :powered-actuation near humans)"}
-     :handoffAt {:type "string" :format "datetime" :description "G11 — as-of history"}}}}}}
+[{:db/id -1
+  :lex/lexicon 1
+  :lex/id "com.etzhayyim.tazuna.autonomyHandoff"
+  :lex/defs "{:main {:type \"record\", :key \"tid\", :record {:type \"object\", :required [\"handoffId\" \"policyId\" \"robotId\" \"supervision\" \"takebackLatencyMs\" \"saeCeiling\" \"outwardGated\"], :properties {:handoffId {:type \"string\", :description \"stable hand-off id\"}, :policyId {:type \"string\", :description \"the policyArtifact handed the reins\"}, :robotId {:type \"string\", :description \"the robot under supervised autonomy\"}, :supervision {:type \"string\", :enum [\"member-attended\" \"operator-attended\"], :description \"N6 — autonomy runs only under supervision; never unattended at this design\"}, :takebackLatencyMs {:type \"integer\", :description \"max latency for the member to take the reins back (instant-takeback discipline, wadachi SAE-L4)\"}, :saeCeiling {:type \"string\", :const \"L4\", :description \"N6 — autonomy may not exceed the wadachi SAE-L4 ceiling (ADR-2605242000)\"}, :exceptionToTeleop {:type \"boolean\", :description \"on exception, control returns to member teleop (closes the loop)\"}, :outwardGated {:type \"boolean\", :const true, :description \"G7 — live supervised autonomy Council Lv6+ + operator gated (Lv7+ for :powered-actuation near humans)\"}, :handoffAt {:type \"string\", :format \"datetime\", :description \"G11 — as-of history\"}}}}}"}]

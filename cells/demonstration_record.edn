@@ -1,14 +1,13 @@
-{:cell/id "demonstration_record"
- :cell/glyph "綱"
- :cell/face :learning
- :cell/kind :langgraph
- :cell/runtime :wasm
- :cell/node "zebulun"
- :cell/doc "Capture a teleop session's state-action trajectory as a demonstrationEpisode in the open LeRobot-v2 schema (G1), written to the kotoba Datom log + pinned to IPFS/DataLad (80-data/tazuna, no-git-lfs). The demonstration is the member's OWN labour: consent-bound + encrypted + cash=0, part of the member's Wellbecoming trajectory (G8/N8, 非終末論). R0 scaffold (.solve() raises)."
- :cell/entry "cells/demonstration_record/cell.py"
- :cell/handler "DemonstrationRecordCell"
- :cell/state-graph
- {:nodes [:collect-frames :consent-gate :encrypt :pin :record] :entry :collect-frames
-  :edges [[:collect-frames :consent-gate] [:consent-gate :encrypt] [:encrypt :pin] [:pin :record] [:record :end]]}
- :cell/gates ["G1" "G8" "G11" "N8"]
- :cell/kotoba {:reads [:grant/id :robot/id] :writes [:episode/id :episode/cid :episode/consent :episode/cash]}}
+[{:db/id -1
+  :cell/id "demonstration_record"
+  :cell/glyph "綱"
+  :cell/face :learning
+  :cell/kind :langgraph
+  :cell/runtime :wasm
+  :cell/node "zebulun"
+  :cell/doc "Capture a teleop session's state-action trajectory as a demonstrationEpisode in the open LeRobot-v2 schema (G1), written to the kotoba Datom log + pinned to IPFS/DataLad (80-data/tazuna, no-git-lfs). The demonstration is the member's OWN labour: consent-bound + encrypted + cash=0, part of the member's Wellbecoming trajectory (G8/N8, 非終末論). R0 scaffold (.solve() raises)."
+  :cell/entry "cells/demonstration_record/cell.py"
+  :cell/handler "DemonstrationRecordCell"
+  :cell/state-graph "{:nodes [:collect-frames :consent-gate :encrypt :pin :record], :entry :collect-frames, :edges [[:collect-frames :consent-gate] [:consent-gate :encrypt] [:encrypt :pin] [:pin :record] [:record :end]]}"
+  :cell/gates ["G1" "G8" "G11" "N8"]
+  :cell/kotoba "{:reads [:grant/id :robot/id], :writes [:episode/id :episode/cid :episode/consent :episode/cash]}"}]

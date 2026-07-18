@@ -1,14 +1,13 @@
-{:cell/id "autonomy_handoff"
- :cell/glyph "綱"
- :cell/face :learning
- :cell/kind :langgraph
- :cell/runtime :wasm
- :cell/node "dan"
- :cell/doc "The 手綱-release: hand a sim-evaluated policyArtifact the reins ONLY under supervision (member/operator-attended) with instant member takeback, never exceeding the wadachi SAE-L4 ceiling (N6). On exception, control returns to member teleop — closing the loop. Live supervised autonomy Council Lv6+ + operator gated (Lv7+ for :powered-actuation, G7). R0 scaffold (.solve() raises)."
- :cell/entry "cells/autonomy_handoff/cell.py"
- :cell/handler "AutonomyHandoffCell"
- :cell/state-graph
- {:nodes [:check-eval :supervision-gate :sae-ceiling :handoff] :entry :check-eval
-  :edges [[:check-eval :supervision-gate] [:supervision-gate :sae-ceiling] [:sae-ceiling :handoff] [:handoff :end]]}
- :cell/gates ["G7" "G10" "G11" "N6"]
- :cell/kotoba {:reads [:policy/id :policy/eval-score] :writes [:handoff/id :handoff/supervision :handoff/takeback-latency-ms]}}
+[{:db/id -1
+  :cell/id "autonomy_handoff"
+  :cell/glyph "綱"
+  :cell/face :learning
+  :cell/kind :langgraph
+  :cell/runtime :wasm
+  :cell/node "dan"
+  :cell/doc "The 手綱-release: hand a sim-evaluated policyArtifact the reins ONLY under supervision (member/operator-attended) with instant member takeback, never exceeding the wadachi SAE-L4 ceiling (N6). On exception, control returns to member teleop — closing the loop. Live supervised autonomy Council Lv6+ + operator gated (Lv7+ for :powered-actuation, G7). R0 scaffold (.solve() raises)."
+  :cell/entry "cells/autonomy_handoff/cell.py"
+  :cell/handler "AutonomyHandoffCell"
+  :cell/state-graph "{:nodes [:check-eval :supervision-gate :sae-ceiling :handoff], :entry :check-eval, :edges [[:check-eval :supervision-gate] [:supervision-gate :sae-ceiling] [:sae-ceiling :handoff] [:handoff :end]]}"
+  :cell/gates ["G7" "G10" "G11" "N6"]
+  :cell/kotoba "{:reads [:policy/id :policy/eval-score], :writes [:handoff/id :handoff/supervision :handoff/takeback-latency-ms]}"}]

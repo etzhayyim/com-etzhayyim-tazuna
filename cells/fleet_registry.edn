@@ -1,14 +1,13 @@
-{:cell/id "fleet_registry"
- :cell/glyph "綱"
- :cell/face :operation
- :cell/kind :langgraph
- :cell/runtime :wasm
- :cell/node "reuben"
- :cell/doc "Enroll + health-track robotics-body fleet members as robotDescriptor records (clean-room transport: ros2-dds / open-rmf / orbit-rest-shape, G1). Each carries a forceClass (:weaponizable unrepresentable, N1) and a forceAuthRef (1 SBT=1 vote admission, G3) without which no teleopGrant can be built. R0 scaffold (.solve() raises)."
- :cell/entry "cells/fleet_registry/cell.py"
- :cell/handler "FleetRegistryCell"
- :cell/state-graph
- {:nodes [:ingest :classify-force :verify-force-auth :register] :entry :ingest
-  :edges [[:ingest :classify-force] [:classify-force :verify-force-auth] [:verify-force-auth :register] [:register :end]]}
- :cell/gates ["G1" "G3" "G11" "G12"]
- :cell/kotoba {:reads [:robot/id] :writes [:robot/force-class :robot/transport :robot/force-auth-ref]}}
+[{:db/id -1
+  :cell/id "fleet_registry"
+  :cell/glyph "綱"
+  :cell/face :operation
+  :cell/kind :langgraph
+  :cell/runtime :wasm
+  :cell/node "reuben"
+  :cell/doc "Enroll + health-track robotics-body fleet members as robotDescriptor records (clean-room transport: ros2-dds / open-rmf / orbit-rest-shape, G1). Each carries a forceClass (:weaponizable unrepresentable, N1) and a forceAuthRef (1 SBT=1 vote admission, G3) without which no teleopGrant can be built. R0 scaffold (.solve() raises)."
+  :cell/entry "cells/fleet_registry/cell.py"
+  :cell/handler "FleetRegistryCell"
+  :cell/state-graph "{:nodes [:ingest :classify-force :verify-force-auth :register], :entry :ingest, :edges [[:ingest :classify-force] [:classify-force :verify-force-auth] [:verify-force-auth :register] [:register :end]]}"
+  :cell/gates ["G1" "G3" "G11" "G12"]
+  :cell/kotoba "{:reads [:robot/id], :writes [:robot/force-class :robot/transport :robot/force-auth-ref]}"}]

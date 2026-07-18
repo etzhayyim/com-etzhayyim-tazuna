@@ -1,14 +1,13 @@
-{:cell/id "telemetry_ingest"
- :cell/glyph "綱"
- :cell/face :operation
- :cell/kind :langgraph
- :cell/runtime :wasm
- :cell/node "judah"
- :cell/doc "Ingest robot telemetry/state from the open MCAP / rosbag2 container formats (G1) into the kotoba Datom log (as-of, replayable; G11). Privacy-by-construction (G9): in-home/private telemetry stays on-device + encrypted; NO cloud video to third parties, NO biometric capture. R0 scaffold (.solve() raises)."
- :cell/entry "cells/telemetry_ingest/cell.py"
- :cell/handler "TelemetryIngestCell"
- :cell/state-graph
- {:nodes [:read-container :privacy-filter :ingest-datoms] :entry :read-container
-  :edges [[:read-container :privacy-filter] [:privacy-filter :ingest-datoms] [:ingest-datoms :end]]}
- :cell/gates ["G1" "G9" "G11"]
- :cell/kotoba {:reads [:robot/id] :writes [:telemetry/datom :telemetry/on-device :telemetry/encrypted]}}
+[{:db/id -1
+  :cell/id "telemetry_ingest"
+  :cell/glyph "綱"
+  :cell/face :operation
+  :cell/kind :langgraph
+  :cell/runtime :wasm
+  :cell/node "judah"
+  :cell/doc "Ingest robot telemetry/state from the open MCAP / rosbag2 container formats (G1) into the kotoba Datom log (as-of, replayable; G11). Privacy-by-construction (G9): in-home/private telemetry stays on-device + encrypted; NO cloud video to third parties, NO biometric capture. R0 scaffold (.solve() raises)."
+  :cell/entry "cells/telemetry_ingest/cell.py"
+  :cell/handler "TelemetryIngestCell"
+  :cell/state-graph "{:nodes [:read-container :privacy-filter :ingest-datoms], :entry :read-container, :edges [[:read-container :privacy-filter] [:privacy-filter :ingest-datoms] [:ingest-datoms :end]]}"
+  :cell/gates ["G1" "G9" "G11"]
+  :cell/kotoba "{:reads [:robot/id], :writes [:telemetry/datom :telemetry/on-device :telemetry/encrypted]}"}]

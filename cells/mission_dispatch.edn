@@ -1,15 +1,14 @@
-{:cell/id "mission_dispatch"
- :cell/glyph "綱"
- :cell/face :operation
- :cell/kind :langgraph
- :cell/runtime :wasm
- :cell/node "simeon"
- :cell/doc "Allocate missions/tasks to fleet members using the Open-RMF (Apache-2.0) task-allocation + fleet-adapter SHAPE only (G1). Couples to displacement-dividend (G2): a mission that displaces human labour live is refused unless the cohort is registered (ADR-2606032130). Murakumo-only planning (G5). R0 scaffold (.solve() raises)."
- :cell/entry "cells/mission_dispatch/cell.py"
- :cell/handler "MissionDispatchCell"
- :cell/state-graph
- {:nodes [:plan :displacement-gate :allocate :dispatch] :entry :plan
-  :edges [[:plan :displacement-gate] [:displacement-gate :allocate] [:allocate :dispatch] [:dispatch :end]]}
- :cell/llm {:provider :murakumo :endpoint "127.0.0.1:4000" :model "gemma3:4b" :charter-rider true}
- :cell/gates ["G1" "G2" "G5" "G7" "G11"]
- :cell/kotoba {:reads [:robot/id :robot/capabilities] :writes [:mission/id :mission/assignee :mission/displacement-cleared]}}
+[{:db/id -1
+  :cell/id "mission_dispatch"
+  :cell/glyph "綱"
+  :cell/face :operation
+  :cell/kind :langgraph
+  :cell/runtime :wasm
+  :cell/node "simeon"
+  :cell/doc "Allocate missions/tasks to fleet members using the Open-RMF (Apache-2.0) task-allocation + fleet-adapter SHAPE only (G1). Couples to displacement-dividend (G2): a mission that displaces human labour live is refused unless the cohort is registered (ADR-2606032130). Murakumo-only planning (G5). R0 scaffold (.solve() raises)."
+  :cell/entry "cells/mission_dispatch/cell.py"
+  :cell/handler "MissionDispatchCell"
+  :cell/state-graph "{:nodes [:plan :displacement-gate :allocate :dispatch], :entry :plan, :edges [[:plan :displacement-gate] [:displacement-gate :allocate] [:allocate :dispatch] [:dispatch :end]]}"
+  :cell/llm "{:provider :murakumo, :endpoint \"127.0.0.1:4000\", :model \"gemma3:4b\", :charter-rider true}"
+  :cell/gates ["G1" "G2" "G5" "G7" "G11"]
+  :cell/kotoba "{:reads [:robot/id :robot/capabilities], :writes [:mission/id :mission/assignee :mission/displacement-cleared]}"}]

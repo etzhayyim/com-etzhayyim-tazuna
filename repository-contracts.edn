@@ -1,0 +1,1 @@
+{:canonical {:format :edn :manifest "manifest.edn" :lexicons "lex"} :wire {:roots ["wire" ".well-known"] :formats #{:json :jsonld :bpmn}} :forbidden-root-paths ["manifest.jsonld" "run_tests.sh" "methods/publish.bb"] :deprecated-runtimes #{:go :tinygo :shell} :legacy-root "20-actors/tazuna"}

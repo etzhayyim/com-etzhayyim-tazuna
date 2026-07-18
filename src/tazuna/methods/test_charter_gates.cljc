@@ -4,8 +4,9 @@
   Substrate-native Clojure (clj + datomic first tier). tazuna is clean-room remote-robotics
   fleet operation + teleoperation + learning-from-demonstration — Transparent-Force bound,
   no-server-key, dividend-coupled, and 'weaponizable unrepresentable'. Its charter discipline is
-  const/enum-encoded across the 6 first-tier `lex/*.edn` lexicons (read via clojure.edn). This
-  suite pins them so a future R-phase cell wave cannot silently drift them:
+  const/enum-encoded across the 6 first-tier `lex/*.edn` lexicons (read via clojure.edn, then
+  reconstituted from datomic/datascript tx-data shape back to the bare lexicon map — see `lex`
+  below). This suite pins them so a future R-phase cell wave cannot silently drift them:
 
     no-server-key — teleopGrant.serverHeldKey const false, principal const member; teleopCommand
       requires a memberSig and pins serverSig to \"\" (the server never signs)
@@ -23,11 +24,30 @@
             [clojure.set :as set]
             [clojure.edn :as edn]))
 
-(def ^:private here (.getParentFile (java.io.File. ^String *file*)))      ;; methods/
-(def ^:private actor-dir (.getParentFile here))                          ;; tazuna/
-(def ^:private lexdir (java.io.File. actor-dir "lex"))
-(defn- lex [name]
-  (edn/read-string (slurp (java.io.File. lexdir (str name ".edn")))))
+;; `lex/*.edn` is now datomic/datascript tx-data ([{:db/id -1 :lex/lexicon ... :lex/id ...
+;; :lex/defs "<pr-str blob>"}], per etzhayyim/root edn-datomize Phase 4): bare top-level keys
+;; (:lexicon/:id/:defs) were promoted under a `:lex/` namespace derived from the containing
+;; dir, and the nested (non-scalar) :defs map was pr-str'd into a blob string. `reconstitute-
+;; entity` inverts both steps so every downstream `record-node`/`const-of`/`enum-of` call below
+;; keeps seeing the original bare lexicon map shape unchanged.
+(defn- unblob [v]
+  (if (string? v)
+    (try (let [parsed (edn/read-string v)] (if (coll? parsed) parsed v))
+         (catch Exception _ v))
+    v))
+
+(defn- reconstitute-entity [tx-data]
+  (into {} (map (fn [[k v]] [(keyword (name k)) (unblob v)]))
+        (dissoc (first tx-data) :db/id)))
+
+#?(:clj
+   (do
+     (def ^:private here (.getParentFile (java.io.File. ^String *file*)))      ;; methods/
+     (def ^:private actor-dir (.getParentFile here))                          ;; tazuna/
+     (def ^:private lexdir (java.io.File. actor-dir "lex"))
+     (defn- lex [name]
+       (reconstitute-entity
+        (edn/read-string (slurp (java.io.File. lexdir (str name ".edn"))))))))
 
 (defn- record-node [doc] (get-in doc [:defs :main :record]))
 (defn- required-of [doc] (set (:required (record-node doc))))
@@ -87,6 +107,7 @@
   (is (= #{"sim-only" "supervised-handoff" "blocked"} (enum-of (lex "policyArtifact") :promotion))
       "policy promotion is bounded {sim-only, supervised-handoff, blocked}"))
 
-(defn -main [& _]
-  (let [r (run-tests 'tazuna.methods.test-charter-gates)]
-    (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1))))
+#?(:clj
+   (defn -main [& _]
+     (let [r (run-tests 'tazuna.methods.test-charter-gates)]
+       (System/exit (if (zero? (+ (:fail r) (:error r))) 0 1)))))
